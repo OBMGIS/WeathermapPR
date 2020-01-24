@@ -1,61 +1,60 @@
+
 <html>
-    <head>
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
-        />
-        <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
-        <script src="https://api.windy.com/assets/map-forecast/libBoot.js"></script>
-        <style>
-            #windy {
-                width: 100%;
-                height: 300px;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="windy"></div>
+  <head>
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
+    <script src="https://api.windy.com/assets/map-forecast/libBoot.js"></script>
+  	<style>
+  		#windy {
 
-          
-        <script>
+        height: 100%;
+        width: 100%;
         
-        const options = {
-    key: 'UEUrdU2Ir243iOAO1BkonlEAfjzlgMgh', 
-    lat: 50.4,
-    lon: 14.3,
-    zoom: 5,
-};
+  		}
+      #windy #logo-wrapper #logo {
+        left: 80px;
+    }
+      #embed-zoom .zoom-ctrl  {
+    width: 30px !important;
+    height: 30px !important;         }
+#windy #mobile-ovr-select {
+    height: 40px !important;
+}
+  	</style>
+  </head>
+  <body>
+    <div id="windy"></div>
 
-windyInit(options, windyAPI => {
-    const { picker, utils, broadcast } = windyAPI;
+    <script>
 
-    picker.on('pickerOpened', latLon => {
-        // picker has been opened at latLon coords
-        console.log(latLon);
+    const options = {
 
-        const { lat, lon, values, overlay } = picker.getParams();
-        // -> 48.4, 14.3, [ U,V, ], 'wind'
-        console.log(lat, lon, values, overlay);
+                // Required: API key
+                key: 'UEUrdU2Ir243iOAO1BkonlEAfjzlgMgh',
 
-        const windObject = utils.wind2obj(values);
-        console.log(windObject);
-    });
+                // Put additional console output
+                verbose: true,
 
-    picker.on('pickerMoved', latLon => {
-        // picker was dragged by user to latLon coords
-        console.log(latLon);
-    });
+                // Optional: Initial state of the map
+                lat: 18.12,
+                lon: -65.96,
+                zoom: 9,
+                hourFormat: '12h'
+        }
 
-    picker.on('pickerClosed', () => {
-        // picker was closed
-    });
+    // Initialize Windy API
+    windyInit( options, windyAPI => {
+        // windyAPI is ready, and contain 'map', 'store',
+        // 'picker' and other usefull stuff
 
-    // Wait since wather is rendered
-    broadcast.once('redrawFinished', () => {
-        picker.open({ lat: 48.4, lon: 14.3 });
-        // Opening of a picker (async)
-    });
-});        
-        </script>
-    </body>
+        const { map } = windyAPI
+        // .map is instance of Leaflet map
+//CORRECTVERSION
+
+
+
+    })
+
+    </script>
+
+  </body>
 </html>
