@@ -1,62 +1,95 @@
-
+<!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
-    <script src="https://api.windy.com/assets/map-forecast/libBoot.js"></script>
-  	<style>
-  		#windy {
-
-        height: 100%;
-        width: 100%;
-        
-  		}
-      #windy #logo-wrapper #logo {
-        left: 80px;
+<head>
+  <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
+  <script src="https://api.windy.com/assets/map-forecast/libBoot.js"></script>
+  <style>
+    #windy {
+      height: 100%;
+      width: 100%;
     }
-      #embed-zoom .zoom-ctrl  {
-    width: 30px !important;
-    height: 30px !important;         }
-#windy #mobile-ovr-select {
-    height: 40px !important;
-}
-  	</style>
-  </head>
-  <body>
-    <div id="windy"></div>
+    #windy #logo-wrapper #logo {
+      left: 80px;
+    }
+    #embed-zoom .zoom-ctrl {
+      width: 30px !important;
+      height: 30px !important;
+    }
+    #windy #mobile-ovr-select {
+      height: 40px !important;
+    }
+    .info-box {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div id="windy"></div>
+  <div class="info-box" id="san-juan-weather">
+    <h3>San Juan Weather</h3>
+    <p id="temperature">Temperature: --</p>
+    <p id="wind-speed">Wind Speed: --</p>
+    <p id="humidity">Humidity: --</p>
+  </div>
+  <div class="info-box" id="trujillo-alto-weather" style="display: none;">
+    <h3>Trujillo Alto Weather</h3>
+    <p id="ta-temperature">Temperature: --</p>
+    <p id="ta-wind-speed">Wind Speed: --</p>
+    <p id="ta-humidity">Humidity: --</p>
+  </div>
 
-    <script>
-
+  <script>
     const options = {
-
-                // Required: API key
-                key: 'UEUrdU2Ir243iOAO1BkonlEAfjzlgMgh',
-
-                // Put additional console output
-                verbose: true,
-
-                // Optional: Initial state of the map
-                lat: 18.12,
-                lon: -65.96,
-                zoom: 9,
-                hourFormat: '12h'
-        }
+      key: 'UEUrdU2Ir243iOAO1BkonlEAfjzlgMgh',
+      verbose: true,
+      lat: 18.12,
+      lon: -65.96,
+      zoom: 9,
+      hourFormat: '12h'
+    };
 
     // Initialize Windy API
-    windyInit( options, windyAPI => {
-        // windyAPI is ready, and contain 'map', 'store',
-        // 'picker' and other usefull stuff
+    windyInit(options, windyAPI => {
+      const { map } = windyAPI;
 
-        const { map } = windyAPI
-        // .map is instance of Leaflet map
-//CORRECTVERSION
+      // Marker for hometown
+      L.marker([18.31, -65.99]).addTo(map)
+        .bindPopup('This is my hometown!');
 
+      // Fetch weather data for San Juan
+      const sanJuanCoords = { lat: 18.4655, lon: -66.1057 };
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${sanJuanCoords.lat}&lon=${sanJuanCoords.lon}&appid=YOUR_OPENWEATHERMAP_API_KEY&units=metric`)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('temperature').innerText = `Temperature: ${data.main.temp} °C`;
+          document.getElementById('wind-speed').innerText = `Wind Speed: ${data.wind.speed} m/s`;
+          document.getElementById('humidity').innerText = `Humidity: ${data.main.humidity} %`;
+        })
+        .catch(error => console.error('Error fetching weather data:', error));
 
-L.marker([18.31, -65.99]).addTo(map)
-.bindPopup('This is my hometown! Challenge for myself: Show weather conditions for my hometown when user clicks here.');
-    })
-    </script>
+      // Marker for Trujillo Alto
+      const trujilloAltoCoords = [18.3545, -66.0074];
+      const trujilloAltoMarker = L.marker(trujilloAltoCoords).addTo(map)
+        .bindPopup('Click to see weather conditions for Trujillo Alto');
 
-  </body>
+      trujilloAltoMarker.on('click', () => {
+        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${trujilloAltoCoords[0]}&lon=${trujilloAltoCoords[1]}&appid=YOUR_OPENWEATHERMAP_API_KEY&units=metric`)
+          .then(response => response.json())
+          .then(data => {
+            document.getElementById('trujillo-alto-weather').style.display = 'block';
+            document.getElementById('ta-temperature').innerText = `Temperature: ${data.main.temp} °C`;
+            document.getElementById('ta-wind-speed').innerText = `Wind Speed: ${data.wind.speed} m/s`;
+            document.getElementById('ta-humidity').innerText = `Humidity: ${data.main.humidity} %`;
+          })
+          .catch(error => console.error('Error fetching weather data:', error));
+      });
+    });
+  </script>
+</body>
 </html>
-
-
