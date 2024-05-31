@@ -1,95 +1,155 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
-  <script src="https://api.windy.com/assets/map-forecast/libBoot.js"></script>
+  <title>Weather Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js"></script>
   <style>
-    #windy {
-      height: 100%;
+    #map {
+      height: 100vh;
       width: 100%;
     }
-    #windy #logo-wrapper #logo {
-      left: 80px;
-    }
-    #embed-zoom .zoom-ctrl {
-      width: 30px !important;
-      height: 30px !important;
-    }
-    #windy #mobile-ovr-select {
-      height: 40px !important;
-    }
-    .info-box {
+    .info-container {
       position: absolute;
       top: 10px;
       right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+    .info-box {
       background-color: white;
       padding: 10px;
       border-radius: 5px;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     }
+    .gauge-container {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      width: 300px;
+    }
+    .gauge-list {
+      list-style: none;
+      padding: 0;
+    }
+    .gauge-list li {
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
-  <div id="windy"></div>
-  <div class="info-box" id="san-juan-weather">
-    <h3>San Juan Weather</h3>
-    <p id="temperature">Temperature: --</p>
-    <p id="wind-speed">Wind Speed: --</p>
-    <p id="humidity">Humidity: --</p>
+  <div id="map"></div>
+  <div class="gauge-container">
+    <h3>Top 5 Stream Gauges by Water Height</h3>
+    <ul id="gauge-list" class="gauge-list"></ul>
   </div>
-  <div class="info-box" id="trujillo-alto-weather" style="display: none;">
-    <h3>Trujillo Alto Weather</h3>
-    <p id="ta-temperature">Temperature: --</p>
-    <p id="ta-wind-speed">Wind Speed: --</p>
-    <p id="ta-humidity">Humidity: --</p>
+  <div class="info-container">
+    <div class="info-box" id="san-juan-weather">
+      <h3>San Juan Weather</h3>
+      <p id="san-juan-temperature">Temperature: --</p>
+      <p id="san-juan-wind-speed">Wind Speed: --</p>
+      <p id="san-juan-humidity">Humidity: --</p>
+    </div>
+    <div class="info-box" id="trujillo-alto-weather">
+      <h3>Trujillo Alto Weather</h3>
+      <p id="ta-temperature">Temperature: --</p>
+      <p id="ta-wind-speed">Wind Speed: --</p>
+      <p id="ta-humidity">Humidity: --</p>
+    </div>
+    <div class="info-box" id="ponce-weather">
+      <h3>Ponce Weather</h3>
+      <p id="ponce-temperature">Temperature: --</p>
+      <p id="ponce-wind-speed">Wind Speed: --</p>
+      <p id="ponce-humidity">Humidity: --</p>
+    </div>
+    <div class="info-box" id="mayaguez-weather">
+      <h3>Mayaguez Weather</h3>
+      <p id="mayaguez-temperature">Temperature: --</p>
+      <p id="mayaguez-wind-speed">Wind Speed: --</p>
+      <p id="mayaguez-humidity">Humidity: --</p>
+    </div>
   </div>
 
   <script>
-    const options = {
-      key: 'UEUrdU2Ir243iOAO1BkonlEAfjzlgMgh',
-      verbose: true,
-      lat: 18.12,
-      lon: -65.96,
-      zoom: 9,
-      hourFormat: '12h'
-    };
+    const map = L.map('map').setView([18.22, -66.5], 9);
 
-    // Initialize Windy API
-    windyInit(options, windyAPI => {
-      const { map } = windyAPI;
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 18,
+    }).addTo(map);
 
-      // Marker for hometown
-      L.marker([18.31, -65.99]).addTo(map)
-        .bindPopup('This is my hometown!');
+    // Add ArcGIS live stream gauges layer with smaller markers
+    const gaugeLayer = L.esri.featureLayer({
+      url: 'https://services9.arcgis.com/RHVPKKiFTONKtxq3/ArcGIS/rest/services/Live_Stream_Gauges_v1/FeatureServer/0',
+      pointToLayer: function (geojson, latlng) {
+        return L.circleMarker(latlng, {
+          radius: 4,
+          fillColor: "#ff7800",
+          color: "#000",
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.8
+        });
+      },
+      onEachFeature: function (feature, layer) {
+        if (feature.properties) {
+          layer.bindPopup(`<strong>${feature.properties.name}</strong><br>Water Height: ${feature.properties.stage_ft} ft`);
+        }
+      }
+    }).addTo(map);
 
-      // Fetch weather data for San Juan
-      const sanJuanCoords = { lat: 18.4655, lon: -66.1057 };
-      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${sanJuanCoords.lat}&lon=${sanJuanCoords.lon}&appid=ee73654b8478315524e026bc52573200&units=metric`)
+    // Fetch and sort gauges by water height and filter by governing_location
+    const fetchAndDisplayGauges = () => {
+      fetch('https://services9.arcgis.com/RHVPKKiFTONKtxq3/ArcGIS/rest/services/Live_Stream_Gauges_v1/FeatureServer/0/query?where=governing_location%3D%27PR%2C+USA%27&outFields=*&orderByFields=stage_ft%20DESC&f=json')
         .then(response => response.json())
         .then(data => {
-          document.getElementById('temperature').innerText = `Temperature: ${data.main.temp} °C`;
-          document.getElementById('wind-speed').innerText = `Wind Speed: ${data.wind.speed} m/s`;
-          document.getElementById('humidity').innerText = `Humidity: ${data.main.humidity} %`;
+          const gaugeList = document.getElementById('gauge-list');
+          const top5Features = data.features.slice(0, 5);
+          top5Features.forEach(feature => {
+            const li = document.createElement('li');
+            li.textContent = `${feature.attributes.name}: ${feature.attributes.stage_ft} ft`;
+            gaugeList.appendChild(li);
+          });
+        })
+        .catch(error => console.error('Error fetching stream gauges:', error));
+    };
+
+    fetchAndDisplayGauges();
+
+    // Fetch weather data
+    const fetchWeatherData = (coords, elementIdPrefix) => {
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${coords.lat}&lon=${coords.lon}&appid=ee73654b8478315524e026bc52573200&units=metric`)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById(`${elementIdPrefix}-temperature`).innerText = `Temperature: ${data.main.temp} °C`;
+          document.getElementById(`${elementIdPrefix}-wind-speed`).innerText = `Wind Speed: ${data.wind.speed} m/s`;
+          document.getElementById(`${elementIdPrefix}-humidity`).innerText = `Humidity: ${data.main.humidity} %`;
         })
         .catch(error => console.error('Error fetching weather data:', error));
+    };
 
-      // Marker for Trujillo Alto
-      const trujilloAltoCoords = [18.3545, -66.0074];
-      const trujilloAltoMarker = L.marker(trujilloAltoCoords).addTo(map)
-        .bindPopup('Click to see weather conditions for Trujillo Alto');
+    // Coordinates and weather data for different locations
+    const locations = {
+      'san-juan': { lat: 18.4655, lon: -66.1057 },
+      'ta': { lat: 18.3545, lon: -66.0074 },
+      'ponce': { lat: 18.0111, lon: -66.6141 },
+      'mayaguez': { lat: 18.2013, lon: -67.1397 }
+    };
 
-      trujilloAltoMarker.on('click', () => {
-        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${trujilloAltoCoords[0]}&lon=${trujilloAltoCoords[1]}&appid=ee73654b8478315524e026bc52573200&units=metric`)
-          .then(response => response.json())
-          .then(data => {
-            document.getElementById('trujillo-alto-weather').style.display = 'block';
-            document.getElementById('ta-temperature').innerText = `Temperature: ${data.main.temp} °C`;
-            document.getElementById('ta-wind-speed').innerText = `Wind Speed: ${data.wind.speed} m/s`;
-            document.getElementById('ta-humidity').innerText = `Humidity: ${data.main.humidity} %`;
-          })
-          .catch(error => console.error('Error fetching weather data:', error));
-      });
-    });
+    // Fetch weather data for all locations
+    for (const [key, coords] of Object.entries(locations)) {
+      fetchWeatherData(coords, key);
+    }
   </script>
 </body>
 </html>
