@@ -79,7 +79,7 @@
         .bindPopup('Click to see weather conditions for Trujillo Alto');
 
       trujilloAltoMarker.on('click', () => {
-        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${trujilloAltoCoords[0]}&lon=${trujilloAltoCoords[1]}&appid=YOUR_OPENWEATHERMAP_API_KEY&units=metric`)
+        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${trujilloAltoCoords[0]}&lon=${trujilloAltoCoords[1]}&appid=UEUrdU2Ir243iOAO1BkonlEAfjzlgMgh&units=metric`)
           .then(response => response.json())
           .then(data => {
             document.getElementById('trujillo-alto-weather').style.display = 'block';
