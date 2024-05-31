@@ -64,7 +64,7 @@
 
       // Fetch weather data for San Juan
       const sanJuanCoords = { lat: 18.4655, lon: -66.1057 };
-      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${sanJuanCoords.lat}&lon=${sanJuanCoords.lon}&appid=YOUR_OPENWEATHERMAP_API_KEY&units=metric`)
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${sanJuanCoords.lat}&lon=${sanJuanCoords.lon}&appid=UEUrdU2Ir243iOAO1BkonlEAfjzlgMgh&units=metric`)
         .then(response => response.json())
         .then(data => {
           document.getElementById('temperature').innerText = `Temperature: ${data.main.temp} °C`;
