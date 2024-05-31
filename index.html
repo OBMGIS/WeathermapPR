@@ -46,7 +46,7 @@
 
   <script>
     const options = {
-      key: 'UEUrdU2Ir243iOAO1BkonlEAfjzlgMgh',
+      key: 'XYu4rVzpw1AkoF26397KZL7ZnVC3IDwZ',
       verbose: true,
       lat: 18.12,
       lon: -65.96,
@@ -64,7 +64,7 @@
 
       // Fetch weather data for San Juan
       const sanJuanCoords = { lat: 18.4655, lon: -66.1057 };
-      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${sanJuanCoords.lat}&lon=${sanJuanCoords.lon}&appid=UEUrdU2Ir243iOAO1BkonlEAfjzlgMgh&units=metric`)
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${sanJuanCoords.lat}&lon=${sanJuanCoords.lon}&appid=XYu4rVzpw1AkoF26397KZL7ZnVC3IDwZ&units=metric`)
         .then(response => response.json())
         .then(data => {
           document.getElementById('temperature').innerText = `Temperature: ${data.main.temp} °C`;
@@ -79,7 +79,7 @@
         .bindPopup('Click to see weather conditions for Trujillo Alto');
 
       trujilloAltoMarker.on('click', () => {
-        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${trujilloAltoCoords[0]}&lon=${trujilloAltoCoords[1]}&appid=UEUrdU2Ir243iOAO1BkonlEAfjzlgMgh&units=metric`)
+        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${trujilloAltoCoords[0]}&lon=${trujilloAltoCoords[1]}&appid=XYu4rVzpw1AkoF26397KZL7ZnVC3IDwZ&units=metric`)
           .then(response => response.json())
           .then(data => {
             document.getElementById('trujillo-alto-weather').style.display = 'block';
